@@ -1,0 +1,33 @@
+import java.util.Arrays;
+
+import org.apache.commons.net.util.SubnetUtils;
+
+public class IpToBigDecimal {
+
+	public static void main(String[] args) {
+		SubnetUtils utils = new SubnetUtils("**CIDR address");
+		utils.setInclusiveHostCount(true);
+		String[] allIps = utils.getInfo().getAllAddresses();
+		Arrays.stream(allIps).forEach(s -> {
+			System.out.println(s);
+		});
+
+		System.out.println(
+				"Get first IP:  " + allIps[0] + "Equivalent Decimal Value: " + generateDecimalValueOfIp(allIps[0]));
+
+		System.out.println("Get last IP" + allIps[allIps.length - 1] + "Equivalent Decimal Value: "
+				+ generateDecimalValueOfIp(allIps[allIps.length - 1]));
+	}
+
+	static long generateDecimalValueOfIp(String ip) {
+		String[] addrArray = ip.split("\\.");
+		long ipDecimal = 0;
+		for (int i = 0; i < addrArray.length; i++) {
+			int power = 3 - i;
+			ipDecimal += ((Integer.parseInt(addrArray[i]) % 256 * Math.pow(256, power)));
+		}
+		System.out.println(ipDecimal);
+		return ipDecimal;
+	}
+
+}

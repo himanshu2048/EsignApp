@@ -1,0 +1,50 @@
+package com.digital.banking.aop;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.digital.banking.request.RequestModel2;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class FileWritingPerfTest {
+	public static void main(String[] args) {
+		// Example usage
+		List<RequestModel2> data = generateLargeData(); // Replace this with your data generation logic
+		writeLargeJson("output.json", data);
+	}
+
+	private static List<RequestModel2>generateLargeData() {
+		// Replace this with your data generation logic
+		List<RequestModel2> list2 = new ArrayList<RequestModel2>();
+		for (int i = 0; i <= 12000000; i++) {
+			list2.add(new RequestModel2("1", "India", "IN", "North west", "Jaipur"));
+		}
+		return list2;
+	}
+
+	private static void writeLargeJson(String filename, List<RequestModel2> data) {
+		
+		long startTime = System.nanoTime();
+		System.out.println("Start taken: "+ System.nanoTime());
+		JsonFactory jsonFactory = new JsonFactory();
+
+		try (JsonGenerator jsonGenerator = jsonFactory.createGenerator(new FileWriter(new File(filename)))) {
+			jsonGenerator.writeStartArray();
+
+			for (RequestModel2 item : data) {
+				jsonGenerator.writeString(new ObjectMapper().writeValueAsString(item));
+			}
+
+			jsonGenerator.writeEndArray();
+			long endTime = System.nanoTime();
+			System.out.println("Time taken: "+ (endTime-startTime));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}

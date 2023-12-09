@@ -1,0 +1,69 @@
+package com.digital.banking.aop;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.digital.banking.request.FinalModel;
+import com.digital.banking.request.RequestModel1;
+import com.digital.banking.request.RequestModel2;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class CheckStreamMultipleLists {
+
+	public static void main(String[] args) throws JsonProcessingException {
+
+		List<RequestModel1> listA = generateModel1List();
+		List<RequestModel2> listB = generateModel2List();
+		Map<String, RequestModel2> mapB = listB.stream().collect(Collectors.toMap(a -> a.getGeo_id(), a -> a));
+
+		List<FinalModel> listC = listA.stream().filter(b -> mapB.containsKey(b.getGeo_id())).map(b -> {
+			RequestModel2 matchingB = mapB.get(b.getGeo_id());
+			FinalModel c = new FinalModel(b.getNetwork(), matchingB.getCountry(), matchingB.getCountryCode(),
+					matchingB.getRegion(), matchingB.getCity(),generateDecimalValueOfIp(b.getNetwork()));
+			return c;
+		}).collect(Collectors.toList());
+
+		System.out.println(new ObjectMapper().writeValueAsString(listC));
+
+	}
+
+	private static List<RequestModel1> generateModel1List() {
+		List<RequestModel1> list1 = new ArrayList<RequestModel1>();
+		list1.add(new RequestModel1("1.0.0.0", "1"));
+		list1.add(new RequestModel1("1.0.0.1", "2"));
+		list1.add(new RequestModel1("1.0.0.2", "3"));
+		list1.add(new RequestModel1("1.0.0.3", "4"));
+		list1.add(new RequestModel1("1.0.0.4", "1"));
+		list1.add(new RequestModel1("1.0.0.5", "2"));
+		list1.add(new RequestModel1("1.0.0.6", "3"));
+		list1.add(new RequestModel1("1.0.0.7", "4"));
+		list1.add(new RequestModel1("1.0.0.8", "2"));
+		list1.add(new RequestModel1("1.0.0.9", "9"));
+		return list1;
+	}
+
+	private static List<RequestModel2> generateModel2List() {
+		List<RequestModel2> list2 = new ArrayList<RequestModel2>();
+		list2.add(new RequestModel2("1", "India", "IN", "North west", "Jaipur"));
+		list2.add(new RequestModel2("2", "UAE", "AE", "Central", "Dubai"));
+		list2.add(new RequestModel2("3", "Oman", "OM", "North west", "oman"));
+		list2.add(new RequestModel2("9", "England", "GB", "Test", "manchester"));
+		list2.add(new RequestModel2("5", "Germany", "GM", "West South", "Berlin"));
+		return list2;
+	}
+	
+	static long generateDecimalValueOfIp(String ip) {
+		String[] addrArray = ip.split("\\.");
+		long ipDecimal = 0;
+		for (int i = 0; i < addrArray.length; i++) {
+			int power = 3 - i;
+			ipDecimal += ((Integer.parseInt(addrArray[i]) % 256 * Math.pow(256, power)));
+		}
+		System.out.println(ipDecimal);
+		return ipDecimal;
+	}
+
+}
